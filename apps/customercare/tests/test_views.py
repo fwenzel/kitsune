@@ -1,3 +1,6 @@
+from django.conf import settings
+
+from mock import patch_object
 from nose.tools import eq_
 
 from customercare.models import Tweet
@@ -71,3 +74,12 @@ class TweetListTestCase(TestCase):
 
         r = hide_tweet('cheesecake')
         eq_(r.status_code, 400)
+
+    @patch_object(settings._wrapped, 'CC_ALLOW_REMOVE', False)
+    def test_hide_tweets_disabled(self):
+        """Do not allow hiding tweets if feature is disabled."""
+        tw = Tweet.objects.filter(reply_to=None)[0]
+        r = self.client.post(
+            reverse('customercare.hide_tweet', locale='en-US'),
+            {'id': tw.tweet_id})
+        eq_(r.status_code, 418)  # Don't tell a teapot to brew coffee.

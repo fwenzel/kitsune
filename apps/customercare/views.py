@@ -200,6 +200,10 @@ def hide_tweet(request):
 
     Returns proper HTTP status codes.
     """
+    # If feature disabled, bail.
+    if not settings.CC_ALLOW_REMOVE:
+        return HttpResponse(status=418)  # I'm a teapot.
+
     try:
         id = int(request.POST.get('id'))
     except (ValueError, TypeError):
